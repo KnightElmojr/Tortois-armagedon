@@ -5,11 +5,16 @@
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_10e7c"]
 texture = ExtResource("1_v32xr")
 0:0/0 = 0
+0:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+0:0/0/physics_layer_0/angular_velocity = 0.0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [sub_resource type="TileSet" id="TileSet_vcrkt"]
+physics_layer_0/collision_layer = 1
 sources/1 = SubResource("TileSetAtlasSource_10e7c")
 
 [node name="TileMap" type="TileMap"]
 tile_set = SubResource("TileSet_vcrkt")
 rendering_quadrant_size = 100
 format = 2
+layer_0/tile_data = PackedInt32Array(-65536, 1, 0)
