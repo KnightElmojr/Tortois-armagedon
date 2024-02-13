@@ -7,6 +7,8 @@ public partial class Character : CharacterBody2D
 	private const float _jumpSpeed = -400.0f;
 	private const float RotationSpeed = 3f;
 	private const float Deceleration = 0.5f;
+	public const double PI = 3.1415926535897931;
+	
 
 	// Get the gravity from the project settings so you can sync with rigid body nodes.
 	public float Gravity = ProjectSettings.GetSetting("physics/2d/default_gravity").AsSingle();
@@ -33,25 +35,47 @@ public partial class Character : CharacterBody2D
 		bool rotateLeft = Input.IsActionPressed("ui_rotate_left");
 		bool rotateRight = Input.IsActionPressed("ui_rotate_right");
 
-		if (rotateLeft)
+		if (rotateLeft && IsOnFloor())
 		{
+			
 			Rotation -= RotationSpeed * (float)delta;
+			if ( -PI/2 < Rotation & Rotation < 0 ){
+			velocity += new Vector2(-1, 0).Rotated(Rotation) * _speed;
+			}
+			else if ( -PI < Rotation & Rotation < -PI/2 ){
+			velocity += new Vector2(0, -1).Rotated(Rotation) * _speed;
+			}
+			else if ( PI/2 < Rotation & Rotation < PI ){
+			velocity += new Vector2(1, 0).Rotated(Rotation) * _speed;
+			}
+			else if ( 0 < Rotation & Rotation < PI/2 ){
+			velocity += new Vector2(0, 1).Rotated(Rotation) * _speed;
+			}
 		}
 
-		if (rotateRight)
+		if (rotateRight && IsOnFloor())
 		{
 			Rotation += RotationSpeed * (float)delta;
+			if ( -PI/2 < Rotation & Rotation < 0 ){
+			velocity += new Vector2(0, 1).Rotated(Rotation) * _speed;
+			}
+			else if ( -PI < Rotation & Rotation < -PI/2 ){
+			velocity += new Vector2(-1, 0).Rotated(Rotation) * _speed;
+			}
+			else if ( PI/2 < Rotation & Rotation < PI ){
+			velocity += new Vector2(0, -1).Rotated(Rotation) * _speed;
+			}
+			else if ( 0 < Rotation & Rotation < PI/2 ){
+			velocity += new Vector2(1, 0).Rotated(Rotation) * _speed;
+			}
 		}
-		if (rotateLeft || rotateRight)
-		{
+		
 			// Apply forward movement based on rotation
-			velocity = new Vector2(0, 0).Rotated(Rotation) * _speed;
-		}
-		else
-		{
-			// Decelerate if no rotation keys are pressed
-			velocity = velocity.Lerp(Vector2.Zero, Deceleration * (float)delta);
-		}
+			
+			
+			
+			
+		
 		
 		Velocity = velocity;
 		MoveAndSlide();
