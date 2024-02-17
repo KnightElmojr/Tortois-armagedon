@@ -27,10 +27,8 @@ public partial class Character : CharacterBody2D
 			velocity.Y = _jumpSpeed;
 
 		// Get the input direction.
-		float direction = Input.GetAxis("ui_left", "ui_right");
+		velocity.X = 0;
 		
-		velocity.X = direction * _speed;
-
 		// Get the input direction for rotating
 		
 		bool rotateLeft = Input.IsActionPressed("ui_rotate_left");
@@ -77,7 +75,7 @@ public partial class Character : CharacterBody2D
 		//handling auto rotation when no rotate inpits are active
 		if (!rotateRight && IsOnFloor() && !rotateLeft){
 			
-			if ( -PI/4 < Rotation & Rotation < 0 ){
+			if ( -PI/4 < Rotation && Rotation < 0 ){
 			Rotation = Mathf.Lerp(Rotation, 0, RotationSpeed * (float)delta);
 			
 			}
@@ -110,8 +108,10 @@ public partial class Character : CharacterBody2D
 			
 			}
 		}
-		
-		
+		if (-PI/4 < Rotation && Rotation < PI/4 && !rotateLeft && !rotateRight){
+		float direction = Input.GetAxis("ui_left", "ui_right");
+		velocity.X += direction * _speed;
+		}
 			
 			
 			
