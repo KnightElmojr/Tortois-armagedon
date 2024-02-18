@@ -22,19 +22,14 @@ public partial class Character : CharacterBody2D
 		// Add the gravity.
 		velocity.Y += Gravity * (float)delta;
 
-		// Handle jump.
-		if (Input.IsActionJustPressed("ui_up") && IsOnFloor())
-			velocity.Y = _jumpSpeed;
-
-		// Get the input direction.
+		// Add variable for horizontal move.
 		velocity.X = 0;
 		
 		// Get the input direction for rotating
-		
 		bool rotateLeft = Input.IsActionPressed("ui_rotate_left");
 		bool rotateRight = Input.IsActionPressed("ui_rotate_right");
 
-		//Handling rotating to the left side
+		//Handle rotating to the left side
 		if (rotateLeft && IsOnFloor() && !rotateRight)
 		{
 			Rotation -= RotationSpeed * (float)delta;
@@ -52,7 +47,7 @@ public partial class Character : CharacterBody2D
 			velocity += new Vector2(0, 1.1f).Rotated(Rotation) * 0.5f * _speed;
 			}
 		}
-		//Handling rotating to the right side
+		//Handle rotating to the right side
 		if (rotateRight && IsOnFloor() && !rotateLeft)
 		{
 			Rotation += RotationSpeed * (float)delta;
@@ -72,8 +67,19 @@ public partial class Character : CharacterBody2D
 		}
 		
 		
-		//handling auto rotation when no rotate inpits are active
-		if (!rotateRight && IsOnFloor() && !rotateLeft){
+		//Handle mid-air rotating to the left side
+		if (rotateLeft && !IsOnFloor() && !rotateRight)
+		{
+			Rotation -= RotationSpeed * 1.5f * (float)delta;
+		}
+		//Handle mid-air rotating to the right side
+		if (rotateRight && !IsOnFloor() && !rotateLeft)
+		{
+			Rotation += RotationSpeed * 1.5f * (float)delta;
+		}
+		
+		//Handle auto rotation when no rotate inputs or both rotate inputs are active
+		if ((!rotateRight && IsOnFloor() && !rotateLeft) | (rotateRight && IsOnFloor() && rotateLeft)){
 			
 			if ( -PI/4 < Rotation && Rotation < 0 ){
 			Rotation = Mathf.Lerp(Rotation, 0, RotationSpeed * (float)delta);
@@ -108,9 +114,23 @@ public partial class Character : CharacterBody2D
 			
 			}
 		}
-		if (-PI/4 < Rotation && Rotation < PI/4 && !rotateLeft && !rotateRight){
-		float direction = Input.GetAxis("ui_left", "ui_right");
-		velocity.X += direction * _speed;
+		
+		//Only when on feet
+		if (-PI/8 < Rotation && Rotation < PI/8 && !rotateLeft && !rotateRight){
+		
+			//Handle move.
+			float direction = Input.GetAxis("ui_left", "ui_right");
+			velocity.X += direction * _speed;
+			
+			// Handle jump.
+			if (Input.IsActionJustPressed("ui_up") && IsOnFloor())
+				velocity.Y = _jumpSpeed;
+		}
+		
+		//Handle move in mid-air.
+		else if (!IsOnFloor()){
+			float direction = Input.GetAxis("ui_left", "ui_right");
+			velocity.X += direction * _speed;
 		}
 			
 			
