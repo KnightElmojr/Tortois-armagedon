@@ -4,17 +4,20 @@ using System;
 public partial class Character : CharacterBody2D
 {
 	private const float _speed = 100.0f;
-	private const float _jumpSpeed = -400.0f;
-	private const float RotationSpeed = 3f;
+	private const float _minJumpSpeed = 150.0f;
+	private const float _maxJumpSpeed = 200.0f;
+	private const float jumpTime = 0.32f;
+	private const float RotationSpeed = 2f;
 	private const float Deceleration = 0.5f;
 	private const float PI = 3.1415926535897931f;
 	
 
 	// Get the gravity from the project settings so you can sync with rigid body nodes.
 	public float Gravity = ProjectSettings.GetSetting("physics/2d/default_gravity").AsSingle();
-
+	private float _jumpTimer = 0;
+	private bool _isJumping = false;
 	
-
+	
 	public override void _PhysicsProcess(double delta)
 	{
 		Vector2 velocity = Velocity;
@@ -22,6 +25,13 @@ public partial class Character : CharacterBody2D
 		// Add the gravity.
 		velocity.Y += Gravity * (float)delta;
 
+		// Reset jump state when touching ground
+		 if (IsOnFloor())
+			{
+				velocity.Y = 0;
+				_isJumping = false;
+			}
+			
 		// Add variable for horizontal move.
 		velocity.X = 0;
 		
@@ -47,6 +57,7 @@ public partial class Character : CharacterBody2D
 			velocity += new Vector2(0, 1.1f).Rotated(Rotation) * 0.5f * _speed;
 			}
 		}
+		
 		//Handle rotating to the right side
 		if (rotateRight && IsOnFloor() && !rotateLeft)
 		{
@@ -66,12 +77,12 @@ public partial class Character : CharacterBody2D
 			}
 		}
 		
-		
 		//Handle mid-air rotating to the left side
 		if (rotateLeft && !IsOnFloor() && !rotateRight)
 		{
 			Rotation -= RotationSpeed * 1.5f * (float)delta;
 		}
+		
 		//Handle mid-air rotating to the right side
 		if (rotateRight && !IsOnFloor() && !rotateLeft)
 		{
@@ -79,7 +90,8 @@ public partial class Character : CharacterBody2D
 		}
 		
 		//Handle auto rotation when no rotate inputs or both rotate inputs are active
-		if ((!rotateRight && IsOnFloor() && !rotateLeft) | (rotateRight && IsOnFloor() && rotateLeft)){
+		if ((!rotateRight && IsOnFloor() && !rotateLeft) | (rotateRight && IsOnFloor() && rotateLeft))
+		{
 			
 			if ( -PI/4 < Rotation && Rotation < 0 ){
 			Rotation = Mathf.Lerp(Rotation, 0, RotationSpeed * (float)delta);
@@ -116,23 +128,46 @@ public partial class Character : CharacterBody2D
 		}
 		
 		//Only when on feet
-		if (-PI/8 < Rotation && Rotation < PI/8 && !rotateLeft && !rotateRight){
+		if (-PI/8 < Rotation && Rotation < PI/8 && !rotateLeft && !rotateRight)
+		{
 		
 			//Handle move.
 			float direction = Input.GetAxis("ui_left", "ui_right");
 			velocity.X += direction * _speed;
 			
 			// Handle jump.
-			if (Input.IsActionJustPressed("ui_up") && IsOnFloor())
-				velocity.Y = _jumpSpeed;
+			if (Input.IsActionPressed("ui_up") && IsOnFloor())
+			{
+				_isJumping = true;
+				_jumpTimer = 0;
+			}
 		}
 		
-		//Handle move in mid-air.
-		else if (!IsOnFloor()){
-			float direction = Input.GetAxis("ui_left", "ui_right");
-			velocity.X += direction * _speed;
-		}
+		//Handle jumpcut.
+		if (Input.IsActionPressed("ui_up") && _isJumping)
+			{
+				if (_jumpTimer < jumpTime)
+				{
+					velocity.Y = -Mathf.Lerp(_minJumpSpeed, _maxJumpSpeed, _jumpTimer / jumpTime);
+					_jumpTimer += (float)delta;
+				}
+				else
+				{
+					_isJumping = false;
+				}
+			}
+		else
+			{
+				_isJumping = false;
+			}
 			
+		//Handle move in mid-air.
+		if (!IsOnFloor())
+		{
+			float direction = Input.GetAxis("ui_left", "ui_right");
+			velocity.X += direction * 0.5f * _speed;
+		}
+		
 			
 			
 			
